@@ -17,13 +17,10 @@ def _load():
     return json.loads(REPORT.read_text())
 
 
-def test_report_exists():
-    """The agent produced a report file."""
-    assert REPORT.exists(), "no report.json found"
-
-
 def test_report_is_json_object_with_exact_keys():
-    """The report is a JSON object with exactly the required keys."""
+    """Criterion 1: /app/report.json exists and parses as a JSON object with
+    exactly the keys total_requests, unique_ips, and top_path."""
+    assert REPORT.exists(), "no report.json found"
     report = _load()
     assert isinstance(report, dict), "report.json must contain a JSON object"
     assert set(report.keys()) == set(EXPECTED.keys()), (
@@ -33,15 +30,18 @@ def test_report_is_json_object_with_exact_keys():
 
 
 def test_total_requests():
-    """total_requests matches the number of requests in the log."""
+    """Criterion 2: total_requests equals the number of non-empty lines in
+    /app/access.log (6)."""
     assert _load()["total_requests"] == EXPECTED["total_requests"]
 
 
 def test_unique_ips():
-    """unique_ips matches the number of distinct client IPs in the log."""
+    """Criterion 3: unique_ips equals the number of distinct client IPs in
+    /app/access.log (3)."""
     assert _load()["unique_ips"] == EXPECTED["unique_ips"]
 
 
 def test_top_path():
-    """top_path is the most frequently requested path in the log."""
+    """Criterion 4: top_path is the most frequently requested path in
+    /app/access.log (/index.html)."""
     assert _load()["top_path"] == EXPECTED["top_path"]
